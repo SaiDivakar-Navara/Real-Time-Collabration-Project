@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Editor - Collaborative Workspace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="editor.css">
+    <script type="importmap">
+        {
+        "imports": {
+            "@tiptap/core": "https://esm.sh/@tiptap/core@2.5.9?bundle",
+            "@tiptap/starter-kit": "https://esm.sh/@tiptap/starter-kit@2.5.9?bundle",
+            "@tiptap/extension-underline": "https://esm.sh/@tiptap/extension-underline@2.5.9?bundle",
+            "@tiptap/extension-text-align": "https://esm.sh/@tiptap/extension-text-align@2.5.9?bundle",
+            "@tiptap/extension-text-style": "https://esm.sh/@tiptap/extension-text-style@2.5.9?bundle",
+            "@tiptap/extension-color": "https://esm.sh/@tiptap/extension-color@2.5.9?bundle",
+            "@tiptap/extension-font-family": "https://esm.sh/@tiptap/extension-font-family@2.5.9?bundle",
+            "@tiptap/extension-image": "https://esm.sh/@tiptap/extension-image@2.5.9?bundle",
+            "@tiptap/extension-link": "https://esm.sh/@tiptap/extension-link@2.5.9?bundle",
+            "@tiptap/extension-table": "https://esm.sh/@tiptap/extension-table@2.5.9?bundle",
+            "@tiptap/extension-table-row": "https://esm.sh/@tiptap/extension-table-row@2.5.9?bundle",
+            "@tiptap/extension-table-cell": "https://esm.sh/@tiptap/extension-table-cell@2.5.9?bundle",
+            "@tiptap/extension-table-header": "https://esm.sh/@tiptap/extension-table-header@2.5.9?bundle"
+        }
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="logo">
+                <i class="fas fa-file-alt"></i> DocEditor
+            </div>
+            <input type="text" class="document-title" value="Untitled Document" id="documentTitle">
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="saveStatus" style="font-size:13px; color:#888;"></span>
+            <button class="save-btn" id="saveBtn">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <button class="download-btn" id="downloadBtn">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button class="share-btn" onclick="openShareModal()">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Sidebar - Members -->
+        <div class="sidebar-left" id="leftSidebar">
+            <div class="members-header">
+                <h3><i class="fas fa-users"></i> Members</h3>
+                <button class="add-member-btn" onclick="openAddMemberModal()">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div class="members-list" id="membersList"></div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-container" id="editor-container">
+            <div class="toolbar">
+                <button class="toggle-sidebar" onclick="toggleLeftSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="undoBtn"><i class="fas fa-undo"></i></button>
+                    <button class="toolbar-btn" id="redoBtn"><i class="fas fa-redo"></i></button>
+                </div>
+                <div class="toolbar-group">
+                    <select class="toolbar-select" id="marginSelect">
+                        <option value="normal">Normal Margins</option>
+                        <option value="narrow">Narrow Margins</option>
+                        <option value="wide">Wide Margins</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <select class="toolbar-select" id="fontFamilySelect">
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Calibri" selected>Calibri</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="boldBtn"><i class="fas fa-bold"></i></button>
+                    <button class="toolbar-btn" id="italicBtn"><i class="fas fa-italic"></i></button>
+                    <button class="toolbar-btn" id="underlineBtn"><i class="fas fa-underline"></i></button>
+                    <button class="toolbar-btn" id="strikeBtn"><i class="fas fa-strikethrough"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="h1Btn">H1</button>
+                    <button class="toolbar-btn" id="h2Btn">H2</button>
+                    <button class="toolbar-btn" id="paragraphBtn"><i class="fas fa-paragraph"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <input type="color" class="color-picker" id="textColorPicker" title="Text Color">
+                </div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="alignLeftBtn"><i class="fas fa-align-left"></i></button>
+                    <button class="toolbar-btn" id="alignCenterBtn"><i class="fas fa-align-center"></i></button>
+                    <button class="toolbar-btn" id="alignRightBtn"><i class="fas fa-align-right"></i></button>
+                    <button class="toolbar-btn" id="alignJustifyBtn"><i class="fas fa-align-justify"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="bulletListBtn"><i class="fas fa-list-ul"></i></button>
+                    <button class="toolbar-btn" id="orderedListBtn"><i class="fas fa-list-ol"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="tableBtn"><i class="fas fa-table"></i></button>
+                    <button class="toolbar-btn" id="linkBtn"><i class="fas fa-link"></i></button>
+                    <button class="toolbar-btn" id="imageBtn"><i class="fas fa-image"></i></button>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+
+                <button class="toggle-sidebar" onclick="toggleRightSidebar()" style="margin-left: auto;">
+                    <i class="fas fa-comments"></i>
+                </button>
+            </div>
+
+            <div class="editor-wrapper">
+                <div id="editor"></div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Chat -->
+        <div class="sidebar-right" id="rightSidebar">
+            <div class="chat-header">
+                <h3><i class="fas fa-comments"></i> Team Chat</h3>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <textarea class="chat-input-field" id="chatInput" placeholder="Type a message..." rows="2"></textarea>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal" id="addMemberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Member</h3>
+                <button class="close-btn" onclick="closeModal('addMemberModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="memberEmail" placeholder="Enter email address">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Permission Level</label>
+                <select class="form-select" id="memberPermission">
+                    <option value="view">Can View</option>
+                    <option value="edit">Can Edit</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal('addMemberModal')">Cancel</button>
+                <button class="btn-primary" onclick="addMember()">Add Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Share Document</h3>
+                <button class="close-btn" onclick="closeModal('shareModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Access Code</label>
+                <input type="text" class="form-input" id="shareAccessCode" readonly onclick="this.select()">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal('shareModal')">Close</button>
+                <button class="btn-primary" onclick="copyShareLink()">Copy Code</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script type="module" src="editor.js"></script>
+</body>
+</html>
