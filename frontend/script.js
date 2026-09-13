@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return setLoading(submitBtn, false);
       }
 
-      const result = await makeAPICall("http://localhost:5000/api/auth/register", {
+      const result = await makeAPICall("/api/auth/register", {
         firstname,
         lastname,
         email,
@@ -401,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return setLoading(submitBtn, false);
       }
 
-      const result = await makeAPICall("http://localhost:5000/api/auth/login", {
+      const result = await makeAPICall("/api/auth/login", {
         email,
         password
       });
