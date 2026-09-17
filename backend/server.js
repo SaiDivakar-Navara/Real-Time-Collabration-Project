@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
 const Document = require('./models/Document');
 const ChatMessage = require('./models/ChatMessage');
+const path = require("path");
 
 
 const app = express();
@@ -112,6 +113,9 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// Frontend
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, "0.0.0.0", () => {
